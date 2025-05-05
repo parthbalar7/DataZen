@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+
+# React
+node_modules/
+build/
+.env
+
+# System
+.DS_Store
+

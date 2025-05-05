@@ -1,0 +1,70 @@
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #121212;
+  color: #f0f0f0;
+}
+
+a {
+  text-decoration: none;
+}
+
+header {
+  background-color: #1e1e1e;
+  padding: 1rem;
+  text-align: center;
+}
+
+nav a {
+  margin: 0 15px;
+  color: #f0f0f0;
+  font-weight: bold;
+}
+
+nav a:hover {
+  color: #ffa500;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  background-color: #3e3e3e;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  margin: 0.5rem;
+}
+
+button:hover {
+  background-color: #5e5e5e;
+}
+
+.container {
+  padding: 2rem;
+  text-align: center;
+}
+
+.card {
+  background-color: #1e1e1e;
+  padding: 1rem;
+  margin: 1rem auto;
+  border-radius: 8px;
+  max-width: 600px;
+  text-align: left;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.pricing-card {
+  background-color: #3e3e3e;
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 250px;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+}
+
