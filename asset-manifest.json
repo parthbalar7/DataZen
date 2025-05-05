@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/DataZen/static/css/main.136e506c.css",
+    "main.js": "/DataZen/static/js/main.1beae935.js",
+    "index.html": "/DataZen/index.html",
+    "main.136e506c.css.map": "/DataZen/static/css/main.136e506c.css.map",
+    "main.1beae935.js.map": "/DataZen/static/js/main.1beae935.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.136e506c.css",
+    "static/js/main.1beae935.js"
+  ]
+}
