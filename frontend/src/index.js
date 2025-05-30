@@ -7,7 +7,6 @@ import App from "./App";
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
-// 1) Create a custom theme (dark background, light text)
 const theme = extendTheme({
   styles: {
     global: {
