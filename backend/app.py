@@ -9,26 +9,21 @@ from flask_jwt_extended import ( # type: ignore
     JWTManager, create_access_token, jwt_required, get_jwt_identity
 )
 
-# Prophet import
 try:
     from fbprophet import Prophet # type: ignore
 except ImportError:
     from prophet import Prophet # type: ignore
 
-# For Clustering (Frequency & Monetary)
 from sklearn.cluster import KMeans # type: ignore
 from sklearn.preprocessing import StandardScaler # type: ignore
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'YOUR_SECRET_KEY'  # Replace with a secure key
+app = Flask(__name__) 
 CORS(app)
 
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
-# --------------------------
-# In-memory user store
-# --------------------------
+
 users = {}
 
 ALLOWED_EXTENSIONS = {'csv'}
@@ -37,17 +32,8 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# ---------------------------
-# Global variable to store
-# "latest inventory data"
-# from the last CSV upload
-# ---------------------------
 latest_inventory_data = []
 
-
-# ---------------------------
-# Template-based text summary
-# ---------------------------
 def generate_text_summary(insights_dict):
     summary_parts = []
 
@@ -88,7 +74,7 @@ def generate_text_summary(insights_dict):
 def home():
     return jsonify({"message": "Welcome to DataZen Flask API with Auth, Date Filters, Forecast & Inventory Alerts!"})
 
-# ---------------------- AUTH ROUTES ---------------------- #
+
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -125,9 +111,7 @@ def login():
     return jsonify({"message": "Login successful", "token": access_token}), 200
 
 
-# ----------------------------------------------------------------
-# Inventory GET - returns the last parsed inventory from CSV
-# ----------------------------------------------------------------
+
 @app.route('/api/inventory', methods=['GET'])
 @jwt_required()
 def get_inventory():
@@ -138,7 +122,6 @@ def get_inventory():
     return jsonify(latest_inventory_data), 200
 
 
-# ------------------- PROTECTED UPLOAD ROUTE ------------------- #
 @app.route('/api/upload', methods=['POST'])
 @jwt_required()
 def upload_file():
@@ -188,7 +171,7 @@ def upload_file():
             pass
 
     if df.empty:
-        latest_inventory_data = []  # clear inventory if no data
+        latest_inventory_data = []  
         return jsonify({
             "charts": {}, 
             "insights": {}, 
@@ -197,9 +180,7 @@ def upload_file():
             "auto_summary": ""
         }), 200
 
-    # ----------------------------------
-    # Build your existing chart data
-    # ----------------------------------
+
     charts_data = {}
 
     # 1) Sales Over Time
@@ -323,7 +304,6 @@ def upload_file():
     # ----------------- INSIGHTS -----------------
     insights = {}
     if 'Sales' in df.columns and not df.empty:
-        # (Same logic as before)
         if 'Product' in df.columns:
             product_sales = df.groupby('Product')['Sales'].sum()
             if not product_sales.empty:
@@ -396,7 +376,7 @@ def upload_file():
                         f"to {last_two.iloc[1]['Date'].strftime('%B %Y')}. Consider a discount campaign!"
                     )
 
-    # ---------------- FORECAST W/ PROPHET ---------------
+  
     forecast_data = {}
     if all(col in df.columns for col in ['Sales','Date']) and not df.empty:
         daily_sales = df.groupby('Date')['Sales'].sum().reset_index()
@@ -417,11 +397,11 @@ def upload_file():
             except Exception as ex:
                 forecast_data['error'] = f"Forecast failed: {str(ex)}"
 
-    # ----------------- CUSTOMER SEGMENTATION (R + F + M) ---------------
+  
     segmentation_data = {}
     if {'CustomerID', 'Sales', 'Date'} <= set(df.columns):
 
-        # ----- Build full RFM table -----
+   
         latest_date = df['Date'].max()
         rfm_df = df.groupby('CustomerID').agg({
             'Date': lambda x: (latest_date - x.max()).days,  # Recency
@@ -431,7 +411,7 @@ def upload_file():
                            'CustomerID': 'Frequency',
                            'Sales': 'Monetary'})
 
-        # ----- K-Means on scaled RFM -----
+     
         scaler = StandardScaler()
         rfm_scaled = scaler.fit_transform(rfm_df)
         k = 4
@@ -440,7 +420,7 @@ def upload_file():
 
         cluster_counts = rfm_df['Cluster'].value_counts().to_dict()
 
-        # ----- Basic cluster insight sentences -----
+  
         inv_centers = scaler.inverse_transform(kmeans.cluster_centers_)
         insight_lines = []
         for idx, (r, f, m) in enumerate(inv_centers):
@@ -449,12 +429,12 @@ def upload_file():
                 f"frequency ≈ {f:.1f} orders, monetary ≈ ${m:.0f}"
             )
 
-        # ----- Top-10 customers by frequency (keep old table) -----
+      
         top10 = rfm_df.sort_values('Frequency', ascending=False)\
                       .head(10).reset_index()
 
         segmentation_data = {
-            'rfm_scatter': {                # for the scatter plot
+            'rfm_scatter': {               
                 'recency':   rfm_df['Recency'].tolist(),
                 'monetary':  rfm_df['Monetary'].tolist(),
                 'frequency': rfm_df['Frequency'].tolist(),
@@ -462,21 +442,19 @@ def upload_file():
             },
             'cluster_sizes':  cluster_counts,
             'cluster_insights': insight_lines,
-            'fm_table': top10.to_dict(orient='records')   # unchanged key
+            'fm_table': top10.to_dict(orient='records')  
         }
 
-    # ----------------- Build Inventory Data (read-only) --------------
-    # We'll group by Product and sum up InventoryQuantity.
-    # Then store it in the global latest_inventory_data for /api/inventory
+
     if 'Product' in df.columns and 'InventoryQuantity' in df.columns:
         inv_df = df.groupby('Product')['InventoryQuantity'].sum().reset_index()
-        # Convert to a list of dicts
+       
         latest_inventory_data = inv_df.to_dict(orient='records')
     else:
-        # If there's no product or inventory info, clear the global
+        
         latest_inventory_data = []
 
-    # Auto summary
+ 
     auto_summary = generate_text_summary(insights)
 
     result = {
