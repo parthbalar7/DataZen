@@ -36,7 +36,7 @@ DataZen is an AI-powered analytics dashboard that transforms raw CSV-based sales
 Installation Guide
 
 1. Clone the repository
-git clone https://github.com/your-username/datazen.git
+git clone https://github.com/parthbalar7/datazen.git
 cd datazen
 
 2. Install Backend Dependencies (Python)
